@@ -3,12 +3,20 @@
 <head>
   <meta charset="utf-8">
   <title>Prompt2Image</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; background: #fafafa; }
+    input, button { margin-top: 0.5em; font-size: 1em; }
+    button { padding: 0.5em 1em; }
+    #img { max-width: 512px; margin-top: 1em; display: block; border-radius: 8px; box-shadow: 0 0 6px #ccc; }
+    #loader { display: none; color: #666; font-style: italic; }
+  </style>
 </head>
 <body>
   <h2>Prompt → Image Generator</h2>
+
   <form id="form">
     <label>Prompt:<br>
-      <input id="prompt" name="prompt" style="width:400px">
+      <input id="prompt" name="prompt" style="width:400px" required>
     </label><br>
     <label>Negative Prompt:<br>
       <input id="negative" name="negative" style="width:400px">
@@ -19,26 +27,44 @@
     <button type="submit">Generate</button>
   </form>
 
+  <div id="loader">Generating image... please wait ⏳</div>
   <pre id="out"></pre>
-  <img id="img" style="max-width:600px;margin-top:1em">
+  <img id="img" src="" alt="Generated image will appear here">
 
   <script>
     document.getElementById("form").onsubmit = async (e) => {
       e.preventDefault();
+
       const data = {
         prompt: document.getElementById("prompt").value,
         negative_prompt: document.getElementById("negative").value,
         seed: parseInt(document.getElementById("seed").value)
       };
-      const r = await fetch("/generate", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(data)
-      });
-      const j = await r.json();
-      document.getElementById("out").textContent = JSON.stringify(j, null, 2);
-      if (j.image && j.image.path) {
-        document.getElementById("img").src = j.image.path + "?t=" + Date.now();
+
+      document.getElementById("loader").style.display = "block";
+      document.getElementById("out").textContent = "";
+      document.getElementById("img").src = "";
+
+      try {
+        const r = await fetch("/generate", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(data)
+        });
+
+        const j = await r.json();
+        document.getElementById("out").textContent = JSON.stringify(j, null, 2);
+        document.getElementById("loader").style.display = "none";
+
+        if (j.image && j.image.filename) {
+          // Directly display the generated image via /images/<filename>
+          document.getElementById("img").src = "/images/" + j.image.filename + "?t=" + Date.now();
+        } else {
+          document.getElementById("out").textContent += "\n⚠️ No image filename returned.";
+        }
+      } catch (err) {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("out").textContent = "Error: " + err.message;
       }
     };
   </script>
