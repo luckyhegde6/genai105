@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Prompt2Image</title>
+</head>
+<body>
+  <h2>Prompt → Image Generator</h2>
+  <form id="form">
+    <label>Prompt:<br>
+      <input id="prompt" name="prompt" style="width:400px">
+    </label><br>
+    <label>Negative Prompt:<br>
+      <input id="negative" name="negative" style="width:400px">
+    </label><br>
+    <label>Seed:<br>
+      <input id="seed" name="seed" value="42">
+    </label><br><br>
+    <button type="submit">Generate</button>
+  </form>
+
+  <pre id="out"></pre>
+  <img id="img" style="max-width:600px;margin-top:1em">
+
+  <script>
+    document.getElementById("form").onsubmit = async (e) => {
+      e.preventDefault();
+      const data = {
+        prompt: document.getElementById("prompt").value,
+        negative_prompt: document.getElementById("negative").value,
+        seed: parseInt(document.getElementById("seed").value)
+      };
+      const r = await fetch("/generate", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+      });
+      const j = await r.json();
+      document.getElementById("out").textContent = JSON.stringify(j, null, 2);
+      if (j.image && j.image.path) {
+        document.getElementById("img").src = j.image.path + "?t=" + Date.now();
+      }
+    };
+  </script>
+</body>
+</html>

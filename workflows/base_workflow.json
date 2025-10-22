@@ -1,0 +1,59 @@
+{
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "v1-5-pruned-emaonly-fp16.safetensors"
+    }
+  },
+  "2": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "anime style girl with pink hair, cherry blossoms, studio ghibli aesthetic, masterpiece, 4k",
+      "clip": ["1", 1]
+    }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "blurry, deformed, low quality, extra limbs",
+      "clip": ["1", 1]
+    }
+  },
+  "7": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    }
+  },
+  "4": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 42,
+      "steps": 20,
+      "cfg": 8.0,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": ["1", 0],
+      "positive": ["2", 0],
+      "negative": ["3", 0],
+      "latent_image": ["7", 0]
+    }
+  },
+  "5": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["4", 0],
+      "vae": ["1", 2]
+    }
+  },
+  "6": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": ["5", 0],
+      "filename_prefix": "generated_image"
+    }
+  }
+}
