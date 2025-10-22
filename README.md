@@ -279,3 +279,9 @@ Result
   }
 }
 ```
+### Screenshots 
+<img width="753" height="717" alt="image" src="https://github.com/user-attachments/assets/6b32c498-259e-49ab-8ee8-b4a9e5bcc39c" />
+
+ComfyUI
+<img width="1417" height="770" alt="image" src="https://github.com/user-attachments/assets/08cb1656-e16a-4e04-a6b4-2eab9c3aac62" />
+
